@@ -15,7 +15,7 @@ passport.deserializeUser((id, done) => {
 });
 
 
-// VALIDATE EMAIL & PASSWORD
+// VALIDATE EMAIL & PASSWORD within SignUp and SignIn, prior to DB query
 // [check('email', 'Invalid email').notEmpty.isEmail(), check('password', 'Invalid password').notEmpty.isLength({min: 4})]
 // var errors = validationResults(req);
 // if (errors) {
@@ -27,6 +27,7 @@ passport.deserializeUser((id, done) => {
 // };
 
 
+// SIGNUP Page 
 passport.use('local.signup', 
     new LocalStrategy(
         {
@@ -40,7 +41,7 @@ passport.use('local.signup',
                     return done(err);
                 }
                 if (user) {
-                    // not saying it was successful, but sending a message specifying why it wasn't
+                    // not saying it was successful, but sending a flash message specifying why it wasn't
                     return done(null, false, {message: 'Email is already in use.'})
                 }
                 var newUser = new User();
@@ -55,3 +56,29 @@ passport.use('local.signup',
             });
 
 }));
+
+// SIGNIN Page
+passport.use('local.signin', 
+    new LocalStrategy(
+        {
+            usernameField: 'email',
+            passwordField: 'password',
+            passReqToCallback: true
+        }, 
+            (req, email, password, done) => {
+                User.findOne({email}, (err, user) => {
+                    if (err) {
+                        return done(err);
+                    }
+                    if (!user) {
+                        // not saying it was successful, but sending a flash message specifying why it wasn't
+                        return done(null, false, {message: 'No user found.'})
+                    }
+// DEBUG THE CALL TO validPassword()!!!
+                    // if (!(user.validPassword(password))){
+                    //     return done(null, false, {message: 'Incorrect password.'})
+                    // }
+                    return done(null, user); 
+                });
+        }
+))
