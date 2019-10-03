@@ -6,6 +6,7 @@ var logger = require('morgan');
 var expressHbs = require('express-handlebars');
 var mongoose = require('mongoose');
 var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
 var passport = require('passport');
 var flash = require('connect-flash');
 // var validator = require('express-validator');
@@ -28,15 +29,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // app.use(validator());
 app.use(cookieParser());
-app.use(session({secret: 'mysupersecret', resave: false, saveUninitialized: false})); //change secret value during deployment
+// cookie configured for 3 hours
+app.use(session({
+  secret: 'dufflebaghustle',
+  resave: false,
+  saveUninitialized: false, 
+  store: new MongoStore ({mongooseConnection : mongoose.connection}),
+  cookie: { maxAge: 180 * 60 * 1000}
+})); //change secret value during deployment
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// SET USER LOG-IN STATE GLOBALLY; USE IN VIEWS
+// SET USER LOG-IN STATE GLOBALLY
+// Allow session & login-value access to handlebar-views
 app.use((req, res, next) => {
   res.locals.login = req.isAuthenticated();
+  res.locals.session = req.session;
   next();
 });
 
