@@ -12,6 +12,11 @@ router.get('/profile', isLoggedIn , (req, res, next) => {
     res.render('user/profile');
   });
 
+router.get('/logout', isLoggedIn ,(req, res, next) => {
+    req.logout();
+    res.redirect('/');
+  });
+
 //  ALL OF THE FOLLOWING ROUTES DO NOT REQUIRE SIGNING IN
 router.use('/', notLoggedIn ,(req, res, next) => {
     next();
@@ -25,11 +30,6 @@ router.use('/', notLoggedIn ,(req, res, next) => {
   router.get('/signin', (req, res, next) => {
     var messages = req.flash('error');
     res.render('user/signin', {csrfToken: req.csrfToken(), messages, hasErrors: messages.length > 0});
-  });
-
-  router.get('/logout', (req, res, next) => {
-    req.logout();
-    res.redirect('/');
   });
 
   router.post('/signup', passport.authenticate('local.signup',{
