@@ -40,4 +40,30 @@ router.get('/shopping-cart', (req, res, next) => {
   res.render('shop/cart', {products: cart.itemList(), totalPrice: cart.totalPrice})
 });
 
+router.get('/shopping-cart', (req, res, next) => {
+  if (!req.session.cart) {
+    return res.render('shop/cart', {products: null});
+  };
+  var cart = new Cart(req.session.cart);
+  res.render('shop/cart', {products: cart.itemList(), totalPrice: cart.totalPrice})
+});
+
+router.get('/checkout', (req, res, next) => {
+  if (!req.session.cart) {
+    return res.redirect('/shopping-cart');
+  };
+  var cart = new Cart(req.session.cart);
+  res.render('shop/checkout', {total: cart.totalPrice});
+});
+
+router.post('/final-checkout', (req, res, next) => {
+  // if (!req.session.cart) {
+  //   return res.redirect('/shopping-cart');
+  // };
+  // var cart = new Cart(req.session.cart);
+  res.redirect('/');
+});
+
+
+
 module.exports = router;
