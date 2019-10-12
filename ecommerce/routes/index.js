@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var Product = require('../models/product');
+var Cart = require('../models/cart');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -14,7 +15,24 @@ router.get('/', function(req, res, next) {
   }); // queries DB for Product collection, mongoose object
 });
 
+// push product into cart, store in cart object
+router.get('/add-to-cart/:id', (req, res, next) => {
+  var productId = req.params.id; //retrieve productID in order to add product to session cart
+  var cart = new Cart(req.session.cart ? req.session.cart : {}); // if session cart exists, pass to Cart() function else send empty Cart object
+  // mongoose query to find product from DB, to add to cart
+  Product.findById(productId, (err, product) => {
+    if (err) {
+      console.log(err);
+      return res.redirect('/'); // redirect to home page for now (if product doesn't exist)
+    }
+    cart.add(product, productId);
+    req.session.cart = cart; // update session cart
+    console.log(req.session.cart);
+    res.redirect('/'); // redirect to product page
+  });
+
+
+
+});
+
 module.exports = router;
-
-
-// 17:46
